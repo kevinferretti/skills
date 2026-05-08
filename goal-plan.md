@@ -1,13 +1,13 @@
 ---
 name: goal-plan
-description: Create or update a self-contained goal-ready plan artifact for Codex `/goal` runs. Use when the user wants a plan, charter, checklist, definition of done, constraints, validation loop, stop conditions, or handoff artifact that lets them later run a terse goal such as `/goal Implement GOAL_PLAN.md.`
+description: Create or update a self-contained goal-ready plan artifact for Codex `/goal` runs. Use when the user wants a plan, charter, checklist, definition of done, constraints, final verification standards, stop conditions, or handoff artifact in `./goals/` that lets them later run a terse goal such as `/goal Implement the plan in ./goals/GOAL_PLAN_example.md.`
 ---
 
-# Prepare Goal Plan
+# Goal Plan
 
 ## Overview
 
-Produce a Markdown artifact that is strong enough for a long-running Codex goal: clear objective, bounded scope, repo-grounded context, validation loop, checkpoint plan, and explicit stop conditions.
+Produce a Markdown artifact that is strong enough for a long-running Codex goal: clear objective, bounded scope, repo-grounded context, explicit stop conditions, final verification standards, and a compatibility check against other goal plans.
 
 This skill prepares the work. Do not implement the plan unless the user explicitly asks.
 
@@ -29,7 +29,20 @@ This skill prepares the work. Do not implement the plan unless the user explicit
    - Use the path structure `./goals/GOAL_PLAN_<custom name of goal>.md`.
    - Keep the artifact self-contained enough that a future Codex run can execute it after reading only the plan plus listed context files.
 
-4. Finish with a goal handoff.
+4. Define final verification standards.
+   - Do not use checkpoints as the main execution structure. Let the `/goal` feature manage its own working cadence.
+   - Include final verification that must pass before the goal can be called done.
+   - Prefer exact commands, URLs, browser flows, test files, lint/build steps, deployment checks, and artifact inspections.
+   - For every verification item, state the expected pass condition and what to report if it fails.
+
+5. Check parallel-plan compatibility.
+   - Before marking the plan ready, inspect other Markdown plans under `./goals/`.
+   - Compare the new plan with existing goal plans for likely conflicts if run in parallel.
+   - Look for overlapping files/directories, schema or migration changes, dependency/lockfile changes, shared config/env changes, test fixture changes, Docker/deployment changes, branch/git operations, generated artifacts, and competing assumptions.
+   - Add a "Parallel Compatibility Review" section to the artifact.
+   - If conflicts are minor, list coordination notes. If conflicts are massive or unsafe, leave status as `Draft` or `Blocked` and explain what must be sequenced or split before running goals in parallel.
+
+6. Finish with a goal handoff.
    - Include a "Goal Handoff" section in the artifact with the recommended `/goal` command.
    - Make the command terse, but not brittle. Prefer `/goal Implement the plan in <path>.`
    - In the final response, link the artifact and paste the recommended `/goal` command.
@@ -59,7 +72,7 @@ Recommended command:
 ## Definition Of Done
 
 - [ ] <Observable final condition.>
-- [ ] <Required tests, builds, browser checks, deployments, or artifacts pass.>
+- [ ] All final verification standards pass.
 - [ ] <Plan checkboxes and progress log are updated.>
 - [ ] <Known risks or follow-ups are documented.>
 
@@ -88,37 +101,36 @@ Recommended command:
 - [ ] Stop and ask before <destructive action, production action, secret exposure, large scope change, unresolved product decision, or human approval>.
 - [ ] Pause if <verification failure or ambiguity> means the plan itself needs revision.
 
-## Checkpoints
+## Implementation Requirements
 
-### Checkpoint 1: <Name>
+- [ ] <Required behavior, code change, documentation update, migration, UI flow, or artifact.>
+- [ ] <Required behavior, code change, documentation update, migration, UI flow, or artifact.>
 
-Purpose: <Why this checkpoint exists.>
+## Final Verification Standards
 
-Tasks:
+The goal is not done until all applicable verification items pass.
 
-- [ ] <Task>
-- [ ] <Task>
+- [ ] `<command, URL, browser flow, or inspection>` passes with <expected result>.
+- [ ] `<command, URL, browser flow, or inspection>` passes with <expected result>.
+- [ ] If a verification item cannot be run, the final report explains why, what risk remains, and the exact command or manual check a human should run.
 
-Acceptance criteria:
+## Parallel Compatibility Review
 
-- [ ] <Observable pass condition>
+Other plans reviewed:
 
-Verification:
+- [ ] `./goals/<other-plan>.md` - <compatible | minor coordination needed | conflict>
 
-- [ ] `<command or manual check>`
+Parallel safety summary:
 
-### Checkpoint 2: <Name>
+- <State whether this plan can run in parallel with the reviewed plans.>
 
-...
+Potential conflicts:
 
-## Validation Loop
+- <Overlapping files, migrations, config, deployments, tests, generated artifacts, or assumptions.>
 
-After each checkpoint:
+Coordination notes:
 
-- [ ] Run the checkpoint verification.
-- [ ] Update completed checkboxes.
-- [ ] Add a progress log entry.
-- [ ] Re-read stop conditions before continuing.
+- <Sequencing, split, lock, ownership, or "none".>
 
 ## Progress Log
 
@@ -128,9 +140,9 @@ After each checkpoint:
 
 When the goal run stops, report:
 
-- Completed checkpoints.
+- Completed implementation requirements.
 - Files changed.
-- Verification commands and results.
+- Final verification commands and results.
 - Remaining unchecked items.
 - Blockers, risks, or follow-up recommendations.
 ````
@@ -143,7 +155,8 @@ The artifact is not ready for `/goal` until:
 - The definition of done is testable by commands, artifacts, or observable behavior.
 - The constraints include safety, secrets, branch/worktree, and deployment boundaries relevant to the repo.
 - Required context points to concrete files, docs, URLs, issues, or logs.
-- Every checkpoint has verification.
+- Final verification standards are specific enough to run without inventing commands.
+- Other plans in `./goals/` have been reviewed for parallel-run conflicts.
 - Stop conditions are explicit enough to prevent Codex from guessing through high-risk ambiguity.
 - The recommended `/goal` command appears in the artifact and final response.
 
